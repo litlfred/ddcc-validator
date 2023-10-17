@@ -47,7 +47,7 @@ class WHO_Vaccination(
     val date: DateTimeType?,
     val validFrom: DateType?,
     val dose: PositiveIntType?,
-    val totalDoses: PositveIntType?,
+    val totalDoses: PositiveIntType?,
     val country: Coding?,
     val centre: StringType?,
     val signature: Signature?,
