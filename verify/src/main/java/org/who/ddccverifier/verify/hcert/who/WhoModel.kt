@@ -29,7 +29,7 @@ class WHO_Certificate(
     val kid: StringType?,
     val hcid: Identifier?,
     val ddccid: Identifier?,
-    val version: string,
+    val version: StringType,
     val period: WHO_CertificatePeriod
 ): BaseModel()
 
@@ -46,8 +46,8 @@ class WHO_Vaccination(
     val lot: StringType?,
     val date: DateTimeType?,
     val validFrom: DateType?,
-    val dose: PosIntType?,
-    val totalDoses: PosIntType?,
+    val dose: PositiveIntType?,
+    val totalDoses: PositveIntType?,
     val country: Coding?,
     val centre: StringType?,
     val signature: Signature?,
