@@ -108,7 +108,7 @@ class HCertVerifier (private val registry: TrustRegistry) {
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-        }
+        
 
 //        try {
 //            return WhoMapper().run(
