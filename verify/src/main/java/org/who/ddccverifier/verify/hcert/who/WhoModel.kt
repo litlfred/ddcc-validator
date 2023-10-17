@@ -14,119 +14,56 @@ import org.who.ddccverifier.verify.shc.DecimalToDataTimeDeserializer
 import kotlin.reflect.full.declaredMemberProperties
 
 
-class WHO_CWT (
-    @JsonProperty("1")
-    val iss: StringType?,   // Issuer
-    @JsonProperty("2")
-    val sub: StringType?,   // Subject
-    @JsonProperty("3")
-    val aud: StringType?,   // Audience
-    @JsonProperty("4")
-    @JsonDeserialize(using = DecimalToDataTimeDeserializer::class)
-    val exp: DateTimeType?, // expiration
-    @JsonProperty("5")
-    @JsonDeserialize(using = DecimalToDataTimeDeserializer::class)
-    val nbf: DateTimeType?, // not before date
-    @JsonProperty("6")
-    @JsonDeserialize(using = DecimalToDataTimeDeserializer::class)
-    val iat: DateTimeType?, // issued at date
-    @JsonProperty("7")
-    val id: StringType?,   // Audience
-    @JsonProperty("-260")
-    val data: WHO_HCERT?,      // Certificate
-): BaseModel()
-
-class WHO_HCERT(
-    @JsonProperty("1")
-    val cert: WHOLogicalModel?          // Cert
-): BaseModel()
-
-class WHOLogicalModel (
-    val meta: Meta?,
-
+class WHO_CoreDatSet (
     val name: StringType?,
     val birthDate: DateType?,
-    val sex: Coding?,
-    val identifier: StringType?,
-
-    // test
-    val test: TestResult?,
-
-    // certificate
-    val hcid: StringType?,
-    val valid_from: DateTimeType?,
-    val valid_until: DateTimeType?,
-
-    // Vaccine fields are in the root
-    val date: DateTimeType?,
-    val due_date: DateTimeType?,
-    val vaccine_valid: DateType?,
-    val hw: StringType?,
-    val disease: Coding?,
-    val centre: StringType?,
-    val vaccine: Coding?,
-    val lot: StringType?,
-    val dose: PositiveIntType?,
-    val total_doses: PositiveIntType?,
-
-    val brand: Coding?,
-    val ma_holder: Coding?,
-    @JsonDeserialize(using = CodingOrReferenceDeserializer::class)
-    val manufacturer: Base?,
-    val pha: StringType?,
-    val country: Coding?
+    val identifier: Identifier?,
+    val certiifcate: WHO_Certificate?,
+    val vaccination: WHO_Vaccination?,
+    val test: WHO_Test?
 ): BaseModel()
 
-class TestResult (
+
+class WHO_Certificate(
+    val issuer: Reference, //is there a way to specify it is Organization reference?
+    val kid: StringType?,
+    val hcid: Identifier?,
+    val ddccid: Identifier?,
+    val version: string,
+    val period: WHO_CertificatePeriod
+): BaseModel()
+
+class WHO_CertificatePeriod(
+    val start: DateTimeType?,
+    val end: DateTimeType?,
+): BaseModel()
+
+class WHO_Vaccination(
+    val vaccine: Coding?,
+    val brand: Coding?,
+    val manufacturer: Coding?,
+    val maholder: Coding?,
+    val lot: StringType?,
+    val date: DateTimeType?,
+    val validFrom: DateType?,
+    val dose: PosIntType?,
+    val totalDoses: PosIntType?,
+    val country: Coding?,
+    val centre: StringType?,
+    val signature: Signature?,
+    val practitioner: Identifier?,
+    val disease: Coding?,
+    val nextDose: DateTimeType 
+): BaseModel() 
+
+class WHO_Test(
     val pathogen: Coding?,
     val type: Coding?,
     val brand: Coding?,
     val manufacturer: Coding?,
     val origin: Coding?,
-    val date: DateTimeType?,
+    val date: DateType?,
     val result: Coding?,
-    val centre: StringType?,
+    val centre: Coding?,
     val country: Coding?
 ): BaseModel()
-
-class Meta (
-    val notarisedOn: DateTimeType?,
-    val reference: StringType?,
-    val url: StringType?,
-    val passportNumber: StringType?
-): org.hl7.fhir.r4.model.Meta() {
-    private val propertiesByHash = this::class.declaredMemberProperties.associateBy { it.name.hashCode() }
-
-    override fun getProperty(hash: Int, name: String?, checkValid: Boolean): Array<Base?> {
-        return propertiesByHash[hash]?.let {
-            val prop = it.getter.call(this)
-            if (prop == null) {
-                emptyArray()
-            } else if (prop is Base) {
-                arrayOf(prop)
-            } else if (prop is Collection<*>) {
-                if (prop.isEmpty()) {
-                    emptyArray()
-                } else {
-                    (prop as Collection<Base?>).toTypedArray()
-                }
-            } else {
-                emptyArray()
-            }
-        } ?: super.getProperty(hash, name, checkValid)
-    }
-}
-
-object CodingOrReferenceDeserializer: JsonDeserializer<Base>() {
-    override fun deserialize(p: JsonParser, ctxt: DeserializationContext): Base? {
-        val token: TreeNode = p.readValueAsTree()
-
-        return if (token.isValueNode) {
-            Reference().apply {
-                id = token.toString()
-            }
-        } else {
-            return jacksonObjectMapper().readValue<Coding>(token.toString())
-        }
-    }
-}
