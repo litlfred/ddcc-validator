@@ -1,299 +1,198 @@
 map "http://worldhealthorganization.github.io/ddcc/StructureMap/CertWHOtoDDCC" = "WHOtoDDCC"
-
-uses "http://worldhealthorganization.github.io/ddcc/StructureDefinition/CertWHO"     alias WHOLogicalModel as source
-uses "http://worldhealthorganization.github.io/ddcc/StructureDefinition/TestResult"  alias TestResult as source
-uses "http://worldhealthorganization.github.io/ddcc/StructureDefinition/Meta"        alias Meta as source
-
-uses "http://hl7.org/fhir/StructureDefinition/Bundle"                                alias Bundle as target
+map "http://worldhealthorganization.github.io/ddcc/StructureMap/CoreDataSetVSToAddBundle" = "WHOtoDDCC"
 
 
-group WHOtoDDCC (source src: WHOLogicalModel, target bundle: Bundle){
-    src -> bundle.type = "transaction" "set bundle type";
+uses "http://worldhealthorganization.github.io/ddcc/StructureDefinition/DDCCCoreDataSet.VS" alias DDCCVS as source
+uses "http://hl7.org/fhir/StructureDefinition/Bundle" alias AddBundle as target
+uses "http://hl7.org/fhir/StructureDefinition/Patient" alias Patient as target
+uses "http://worldhealthorganization.github.io/ddcc/StructureDefinition/DDCCPatient" alias DDCCPatient as produced
+uses "http://worldhealthorganization.github.io/ddcc/StructureDefinition/DDCCDocumentReferenceQR" alias DDCCDocRefQR as produced
+uses "http://worldhealthorganization.github.io/ddcc/StructureDefinition/DDCCVSComposition" alias DDCCVSComposition as produced
+uses "http://worldhealthorganization.github.io/ddcc/StructureDefinition/DDCCImmunization" alias DDCCImmunization as produced
+uses "http://worldhealthorganization.github.io/ddcc/StructureDefinition/DDCCImmunizationRecommendation" alias DDCCImmRec as produced
 
-    src -> bundle, bundle.entry as entry, entry.resource = create('Composition') as comp then {
-        src -> bundle then ExtractCert(src, bundle, comp) "Certificate";
-        src -> bundle then ExtractComposition(src, comp) "Composition";
-    } "Patient and Composition Create";
+
+
+group CoreDataSetVSToAddBundle(source ddcc : WHOLogicalModel, target bundle : AddBundle) {
+  ddcc -> bundle then VSToAddBundle(ddcc, bundle) "setup add bundle";
 }
 
-group ExtractCert(source src: WHOLogicalModel, target bundle: Bundle, target comp: Composition){
-    src -> comp, bundle.entry as entry, entry.resource = create('Patient') as patient, uuid() as pid then {
-        src -> patient then ExtractPatient(src, pid, patient) "extract patient";
-        src -> comp.subject as subj, subj.reference = append("Patient/", pid) "Composition.Set patient";
 
-        src.vaccine as vac -> comp.section as section then {
-            src ->
-                section.code as code,
-                code.coding as coding,
-                coding.system = "http://loinc.org",
-                coding.code = "11369-6",
-                coding.display = "History of Immunization Narrative"
-                "add section";
-
-            src -> comp,
-                bundle.entry as entryImm, entryImm.resource = create('Immunization') as immunization, uuid() as iid,
-                bundle.entry as entryOrg, entryOrg.resource = create('Organization') as org, uuid() as oid
-                then {
-                    src -> immunization.id = iid "Immunization ID";
-                    src -> org.id = oid "Organization ID";
-
-                    src ->
-                        section.entry as entry,
-                        entry.reference = append("Immunization/", iid ),
-                        section.author as author,
-                        author.reference = append("Organization/", oid)
-                        "add entry/author to section";
-
-                    src.pha as pha -> org.name = pha "Set Organization name";
-
-                    src.hw as performerId ->
-                        bundle.entry as entry,
-                        entry.resource = create('Practitioner') as practitioner,
-                        practitioner.id = uuid() as practitionerId,
-                        practitioner.identifier as identif,
-                        identif.value = performerId,
-                        immunization.performer as performer,
-                        performer.actor as actor,
-                        actor.reference = append("Practitioner/", practitionerId)
-                        "set pract name";
-
-                    src.centre as facility ->
-                        bundle.entry as entry,
-                        entry.resource = create('Location') as location,
-                        location.id = uuid() as locid,
-                        location.name = facility,
-                        immunization.location as loc,
-                        loc.reference = append("Location/", locid)
-                        "facility name";
-
-                    src.due_date as due_date ->
-                        bundle.entry as entryRec, entryRec.resource = create('ImmunizationRecommendation') as rec, uuid() as rid
-                        then {
-                            src -> rec.id = rid "Recommendation ID";
-
-                            src -> rec.patient as subj, subj.reference = append("Patient/", pid) "Immunization Recommendation Set patient";
-                            src -> rec.authority as author, author.reference = append("Organization/", oid) "Composition.Set org";
-
-                            src ->
-                                section.entry as entry,
-                                entry.reference = append("ImmunizationRecommendation/", rid )
-                                "add immunization recommendation to section";
-
-                            src -> rec.recommendation as recommendation
-                                then ExtractRecommendation(src, oid, recommendation) "Extract Recommendation";
-                    } "creating recommendation";
-
-                    src -> comp.author as author, author.reference = append("Organization/", oid) "Composition.Set org";
-
-                    src -> immunization.patient as subj, subj.reference = append("Patient/", pid) "Immunization.Set patient";
-
-                    //vac.is as is -> org.name = is "Set Organization name";
-
-                    src -> bundle then ExtractVaccine(src, oid, immunization) "extract vaccine info";
-                } "Immunization Create";
-        } "Vaccination List";
-
-        src.test as test -> comp.section as section then {
-            src ->
-                section.code as code,
-                code.coding as coding,
-                coding.system = "http://loinc.org",
-                coding.code = "30954-2",
-                coding.display = "Results (Diagnostic findings)"
-                "add section";
-
-            test -> comp,
-                bundle.entry as entryObs, entryObs.resource = create('Observation') as observation, uuid() as iid,
-                bundle.entry as entryOrg, entryOrg.resource = create('Organization') as org, uuid() as oid,
-                bundle.entry as entryEnc, entryEnc.resource = create('Encounter') as enc, uuid() as eid
-                then {
-                    src -> observation.id = iid "Observatiopn ID";
-                    src -> org.id = oid "Organization ID";
-                    src -> enc.id = eid "Observatiopn ID";
-
-                    src ->
-                        section.entry as entry,
-                        entry.reference = append("Observation/", iid ),
-                        section.author as author,
-                        author.reference = append("Organization/", oid)
-                        "add entry/author to section";
-
-                    test.centre as pha -> org.name = pha "Set Organization name";
-
-                    src -> comp.author as author, author.reference = append("Organization/", oid) "Composition.Set org";
-
-                    src -> observation.subject as subj, subj.reference = append("Patient/", pid) "observation.Set patient";
-
-                    src -> observation.encounter as encounter, encounter.reference = append("Encounter/", eid) "encounter.Set provider";
-                    src -> enc.serviceProvider as provider, provider.reference = append("Organization/", oid) "encounter.Set provider";
-
-                    src -> bundle then ExtractTestResult(test, oid, observation) "extract testresult info";
-                } "Test Result Create";
-        } "Test Result List";
-
-        // TODO: Recovery
-
-    } "Patient Create";
+group VSToAddBundle(source ddcc : DDCCVS, target bundle : AddBundle) {
+  ddcc -> bundle.type = 'transaction' "set bundle type";
+  ddcc ->  uuid() as pid,  uuid() as compid,  uuid() as iid,  uuid() as irid,  uuid() as qrwhoid,  uuid() as qrdccid then {
+    ddcc ->  bundle.entry as entry,  entry.fullUrl = append('urn:uuid:', pid),  entry.request as request,  request.method = 'PUT',  request.url = append('Patient/', pid),  create('http://worldhealthorganization.github.io/ddcc/StructureDefinition/DDCCPatient') as patient then {
+      ddcc then DDCCToPatient(ddcc, patient, pid) "setup patient";
+      ddcc -> entry.resource = patient "set patient resource";
+    } "create patient resource";
+    ddcc ->  bundle.entry as entry,  entry.fullUrl = append('urn:uuid:', compid),  entry.request as request,  request.method = 'PUT',  request.url = append('Composition/', compid),  create('http://worldhealthorganization.github.io/ddcc/StructureDefinition/DDCCVSComposition') as comp then {
+      ddcc then DDCCToComposition(ddcc, comp, compid, pid) "setup composition";
+      ddcc ->  comp.category as category,  category.coding as coding,  coding.system = 'http://worldhealthorganization.github.io/ddcc/CodeSystem/DDCC-Composition-Category-CodeSystem',  coding.code = 'ddcc-vs' "set category";
+      ddcc -> comp.title = 'International Certificate of Vaccination or Prophylaxis' "set title";
+      ddcc -> comp.section as section then {
+        ddcc ->  section.code as code,  code.coding as coding,  coding.system = 'http://loinc.org',  coding.code = '11369-6' "set code";
+        ddcc.certificate as certificate then {
+          certificate.issuer as issuer -> section.author = issuer "set author";
+        } "set certificate";
+        // ddcc.certificate as certificate -> section.author as author then {
+        //             certificate.issuer as issuer then {
+        //               issuer.identifier as pha -> author.identifier as identifier, author.type = "Organization" then {
+        //                 pha.value as value -> identifier.value = value "set pha";
+        //               } "set author identifier";
+        //             } "set author ref";
+        //             
+        //           } "set author";
+        ddcc ->  section.focus as focus,  focus.reference = append('Immunization/', iid) "set focus";
+        ddcc ->  section.entry as entry,  entry.reference = append('Immunization/', iid) "add Immunization entry";
+        ddcc ->  section.entry as entry,  entry.reference = append('ImmunizationRecommendation/', irid) "add ImmunizationRecommendation entry";
+        ddcc ->  section.entry as entry,  entry.reference = append('DocumentReference/', qrwhoid) "add WHO QR entry";
+        ddcc ->  section.entry as entry,  entry.reference = append('DocumentReference/', qrdccid) "add DCC QR entry";
+      } "set section";
+      ddcc -> entry.resource = comp "set composition resource";
+    } "create composition resource";
+    ddcc ->  bundle.entry as entry,  entry.fullUrl = append('urn:uuid:', qrwhoid),  entry.request as request,  request.method = 'PUT',  request.url = append('DocumentReference/', qrwhoid),  create('http://worldhealthorganization.github.io/ddcc/StructureDefinition/DDCCDocumentReferenceQR') as qr then {
+      ddcc then DDCCToDocumentReference(ddcc, qr, qrwhoid, pid) "setup WHO DocRef";
+      ddcc ->  qr.category as category,  category.coding as coding,  coding.system = 'http://worldhealthorganization.github.io/ddcc/CodeSystem/DDCC-QR-Category-Usage-CodeSystem',  coding.code = 'who' "set category";
+      ddcc -> qr.description = 'WHO QR code for COVID 19 Vaccine Certificate' "set description";
+      ddcc -> entry.resource = qr "set WHO QR";
+    } "create WHO QR Doc Ref";
+    ddcc ->  bundle.entry as entry,  entry.fullUrl = append('urn:uuid:', qrdccid),  entry.request as request,  request.method = 'PUT',  request.url = append('DocumentReference/', qrdccid),  create('http://worldhealthorganization.github.io/ddcc/StructureDefinition/DDCCDocumentReferenceQR') as qr then {
+      ddcc then DDCCToDocumentReference(ddcc, qr, qrdccid, pid) "setup DCC DocRef";
+      ddcc ->  qr.category as category,  category.coding as coding,  coding.system = 'http://worldhealthorganization.github.io/ddcc/CodeSystem/DDCC-QR-Category-Usage-CodeSystem',  coding.code = 'dcc' "set category";
+      ddcc -> qr.description = 'DCC QR code for COVID 19 Vaccine Certificate' "set description";
+      ddcc -> entry.resource = qr "set DCC QR";
+    } "create DCC QR Doc Ref";
+    ddcc.vaccination first as vaccination ->  bundle.entry as entry,  entry.fullUrl = append('urn:uuid:', iid),  entry.request as request,  request.method = 'PUT',  request.url = append('Immunization/', iid),  create('http://worldhealthorganization.github.io/ddcc/StructureDefinition/DDCCImmunization') as immunization then {
+      ddcc.certificate as certificate then DDCCToImmunization(vaccination, immunization, certificate, iid, pid) "setup immunization";
+      ddcc -> entry.resource = immunization "set immunization resource";
+    } "create immunization resource";
+    ddcc.vaccination first as vaccination ->  bundle.entry as entry,  entry.fullUrl = append('urn:uuid:', irid),  entry.request as request,  request.method = 'PUT',  request.url = append('ImmunizationRecommendation/', irid),  create('http://worldhealthorganization.github.io/ddcc/StructureDefinition/DDCCImmunizationRecommendation') as immrec then {
+      vaccination then DDCCToImmRec(vaccination, immrec, irid, iid, pid) "setup immunization recommendation";
+      ddcc -> entry.resource = immrec "set immunization recommendation resource";
+    } "create immunization recommendation resource";
+  } "set uuids";
 }
 
-group ExtractTestResult(source test: TestResult, source oid, target observation: Observation) {
-    test ->
-        observation.status = 'final'
-        "set observation status";
-
-    test ->
-        observation.category as codeable,
-        codeable.coding as coding,
-        coding.system = "http://terminology.hl7.org/CodeSystem/observation-category",
-        coding.code = "laboratory"
-        "set target disease type";
-
-    test -> observation.code as codeable then {
-        test.type as type -> codeable.coding = type "set type";
-        test.pathogen as pathogen -> codeable.coding = pathogen "set pathogen";
-    } "set observation code";
-
-    test.date as date ->
-        observation.effective = date
-        "set test date";
-
-    test.result as result ->
-        observation.value = create('CodeableConcept') as codeable,
-        codeable.coding = result "set result";
-
-    test.country as co ->
-        observation.extension as ext,
-        ext.value = co,
-        ext.url = "https://WorldHealthOrganization.github.io/ddcc/StructureDefinition/DDCCCountryOfVaccination"
-        "set country";
+group DDCCToImmunization(source src, target immunization : DDCCImmunization, source certificate, source iid, source pid) {
+  iid -> immunization.id = iid "set id";
+  src.brand as brand -> immunization.extension as ext then {
+    brand ->  ext.url = 'http://worldhealthorganization.github.io/ddcc/StructureDefinition/DDCCVaccineBrand',  ext.value = brand "set brand extension values";
+  } "set brand extension";
+  src.maholder as maholder -> immunization.extension as ext then {
+    maholder ->  ext.url = 'http://worldhealthorganization.github.io/ddcc/StructureDefinition/DDCCVaccineMarketAuthorization',  ext.value = maholder "set MA Holder extension values";
+  } "set maholder extension";
+  src.country as country -> immunization.extension as ext then {
+    country.code as code ->  ext.url = 'http://worldhealthorganization.github.io/ddcc/StructureDefinition/DDCCCountryOfVaccination',  ext.value = code "set country extension values";
+  } "set country extension";
+  src.validFrom as validFrom -> immunization.extension as ext then {
+    validFrom ->  ext.url = 'http://worldhealthorganization.github.io/ddcc/StructureDefinition/DDCCVaccineValidFrom',  ext.value = validFrom "set valid from extension values";
+  } "set vaccine valid extension";
+  src -> immunization.status = 'completed' "set status";
+  src.vaccine as vaccine ->  immunization.vaccineCode as vacCode,  vacCode.coding = vaccine "set vaccine";
+  src ->  immunization.patient as patient,  patient.reference = append('Patient/', pid) "set patient";
+  src.manufacturer as manufacturer ->  immunization.manufacturer as tman,  tman.identifier as ident then {
+    manufacturer.system as system -> ident.system = system "set system";
+    manufacturer.code as code -> ident.value = code "set value";
+  } "set manufacturer identifier";
+  src.lot as lot -> immunization.lotNumber = lot "set lot number";
+  src.date as date -> immunization.occurrence = date "set occurrence date";
+  src.centre as centre -> immunization.location as location then {
+    centre -> location.display = centre "set location display";
+  } "set location";
+  src.practitioner as practitioner -> immunization.performer as performer then {
+    practitioner.value as hw -> performer.actor as actor then {
+      hw ->  actor.type = 'Practitioner',  actor.identifier as identifier then {
+        hw -> identifier.value = hw "set hw identifier";
+      } "set actor";
+    } "set performer";
+  } "set practitioner";
+  src -> immunization.protocolApplied as protocol then {
+    src -> protocol.authority as authority then {
+      certificate.issuer as issuer -> authority.type = 'Organization' then {
+        issuer.identifier as pha -> authority.identifier as identifier then {
+          pha.value as value -> identifier.value = value "set pha";
+        } "set issuer identifier";
+      } "set issuer";
+    } "set authority";
+    src.disease as disease -> protocol.targetDisease as tdisease then {
+      disease -> tdisease.coding = disease "set target disease code";
+    } "set target disease";
+    src.dose as dose -> protocol.doseNumber = dose "set dose number";
+    src.totalDoses as totalDoses -> protocol.seriesDoses = totalDoses "set total doses";
+  } "set protocolApplied";
 }
 
-group ExtractVaccine(source vac: WHOLogicalModel, source oid, target immunization: Immunization) {
-    vac.date as dt ->
-        immunization.occurrence = dt
-        "set occurrence date";
-
-    vac.lot as lot -> immunization.lotNumber = lot "set lot number";
-
-    vac.vaccine as vp ->
-        immunization.vaccineCode as type,
-        type.coding = vp
-        "set vaccine coding";
-
-    vac.hcid as hcid ->
-        immunization.identifier as identif,
-        identif.value = hcid
-        "set identifier ci";
-
-// TODO: Waiting for FHIR 5.0
-//    vac.manufacturer as manufacturer ->
-//        immunization.manufacturer = create('CodeableReference') as manuf,
-//        manuf.concept = manufacturer
-//        "set manufacturer";
-
-    vac.brand as brand ->
-        immunization.extension as ext,
-        ext.value = brand,
-        ext.url = "https://WorldHealthOrganization.github.io/ddcc/StructureDefinition/DDCCVaccineBrand"
-        "set brand";
-
-    vac.ma_holder as ma_holder ->
-        immunization.extension as ext,
-        ext.value = ma_holder,
-        ext.url = "https://WorldHealthOrganization.github.io/ddcc/StructureDefinition/DDCCVaccineMarketAuthorization"
-        "set manufacturer extension";
-
-    vac.country as co ->
-        immunization.extension as ext,
-        ext.value = co,
-        ext.url = "https://WorldHealthOrganization.github.io/ddcc/StructureDefinition/DDCCCountryOfVaccination"
-        "set country";
-
-    vac.vaccine_valid as vaccine_valid ->
-        immunization.extension as ext,
-        ext.value = vaccine_valid,
-        ext.url = "https://WorldHealthOrganization.github.io/ddcc/StructureDefinition/DDCCVaccineValidFrom"
-        "set vaccine valid from";
-
-    vac -> immunization.protocolApplied as protocolApplied then ExtractProtocolApplied(vac, oid, protocolApplied) "set protocol applied";
+group DDCCToImmRec(source src, target immrec : DDCCImmunizationRecommendation, source irid, source iid, source pid) {
+  src.date as date -> immrec.date = date "set date";
+  src ->  immrec.patient as patient,  patient.reference = append('Patient/', pid) "set patient";
+  src -> immrec.recommendation as rec then {
+    src.vaccine as vaccine -> rec.vaccineCode as vaccineCode then {
+      vaccine -> vaccineCode.coding = vaccine "set vaccine code coding";
+    } "set vaccine code";
+    src.disease as disease -> rec.targetDisease as targetDisease then {
+      disease -> targetDisease.coding = disease "set target disease coding";
+    } "set target disease";
+    src -> rec.forecastStatus as forecast then {
+      src -> forecast.coding as coding then {
+        src -> coding.system = 'http://terminology.hl7.org/2.1.0/CodeSystem-immunization-recommendation-status.html' "set forecast system";
+        src -> coding.code = 'due' "set forecast code";
+      } "set forecast status coding";
+    } "set forecast status";
+    src -> rec.dateCriterion as due_date then {
+      src -> due_date.code as code then {
+        src -> code.coding as coding then {
+          src -> coding.system = 'http://loinc.org' "set due date code system";
+          src -> coding.code = '30980-7' "set due date code code";
+        } "set due date code coding";
+      } "set due date code";
+      src.nextDose as nextDose -> due_date.value = nextDose "set due date value";
+    } "set date criterion";
+    src.dose as dose -> rec.doseNumber = (dose.toInteger() + 1) "set dose number";
+    src.totalDoses as totalDoses -> rec.seriesDoses = totalDoses "set total doses";
+    src ->  rec.supportingImmunization as imm,  imm.reference = append('Immunization/', iid) "set supporting immunization";
+  } "set recommendation";
 }
 
-group ExtractRecommendation(source vac: WHOLogicalModel, source oid, target recommendation) {
-    vac.vaccine as vp ->
-        recommendation.vaccineCode as type,
-        type.coding = vp
-        "set vaccine coding";
 
-    vac.disease as disease ->
-        recommendation.targetDisease as codeable,
-        codeable.coding = disease
-        "set target disease type";
-
-    vac.dose as dn -> recommendation.doseNumber = evaluate(dn, $this.valueInt + 1) "set dose number";
-
-    vac.total_doses as sd -> recommendation.seriesDoses = sd "set series doses";
-
-    vac ->
-        recommendation.forecastStatus as codeable,
-        codeable.coding as coding,
-        coding.system = "http://terminology.hl7.org/2.1.0/CodeSystem-immunization-recommendation-status.html",
-        coding.code = "due"
-        "set forecastStatus";
-
-    vac.due_date as due_date ->
-        recommendation.dateCriterion as dateCriterion,
-        dateCriterion.code as codeable,
-        dateCriterion.value = due_date,
-        codeable.coding as coding,
-        coding.system = "http://loinc.org",
-        coding.code = "30980-7",
-        coding.display = "Date vaccine due"
-        "set forecastStatus";
+group DDCCToPatient(source src : DDCCVS, target patient : DDCCPatient, source pid) {
+  pid -> patient.id = pid "set id";
+  src.name as name -> patient.name as tName then {
+    name -> tName.text = name "set name";
+  } "set full name";
+  src.birthDate as birthDate -> patient.birthDate = birthDate "set birthDate";
+  src.identifier as identifier -> patient.identifier = identifier "set identifier";
 }
 
-group ExtractProtocolApplied(source vac: VacEvent, source oid, target protocol: ProtocolApplied) {
-    vac.dose as dn -> protocol.doseNumber = dn "set dose number";
-    vac.total_doses as sd -> protocol.seriesDoses = sd "set series doses";
-
-    vac.disease as disease ->
-        protocol.targetDisease as codeable,
-        codeable.coding = disease
-        "set target disease type";
-
-    oid -> protocol.authority as authority, authority.reference = append("Organization/", oid) "set authority";
+group DDCCToDocumentReference(source src : DDCCVS, target ref : DDCCDocRefQR, source id, source pid) {
+  id -> ref.id = id "set id";
+  src -> ref.status = 'current' "set status";
+  src ->  ref.subject as patient,  patient.reference = append('Patient/', pid) "set patient";
+  src -> ref.content as content then {
+    src ->  content.attachment as attachment,  attachment.contentType = 'application/json' "set contentType";
+    src ->  content.format as format,  format.system = 'http://worldhealthorganization.github.io/ddcc/CodeSystem/DDCC-QR-Format-CodeSystem',  format.code = 'serialized' "set format code";
+  } "set serialized content";
+  src -> ref.content as content then {
+    src ->  content.attachment as attachment,  attachment.contentType = 'image/png' "set contentType";
+    src ->  content.format as format,  format.system = 'http://worldhealthorganization.github.io/ddcc/CodeSystem/DDCC-QR-Format-CodeSystem',  format.code = 'image' "set format code";
+  } "set image content";
+  src -> ref.content as content then {
+    src ->  content.attachment as attachment,  attachment.contentType = 'application/pdf' "set contentType";
+    src ->  content.format as format,  format.system = 'http://worldhealthorganization.github.io/ddcc/CodeSystem/DDCC-QR-Format-CodeSystem',  format.code = 'pdf' "set format code";
+  } "set pdf content";
 }
 
-group ExtractPatient(source src: WHOLogicalModel, source pid, target patient: Patient) {
-    pid -> patient.id = pid "Patient ID";
-
-    src.name as patientName -> patient.name = create('HumanName') as humanName, humanName.text = patientName "Patient Name";
-    src.identifier as id -> patient.identifier as identif, identif.value = id "set patient identifier";
-    src.birthDate as birthDate -> patient.birthDate = birthDate "set birthDate";
-    src.sex as sex then {
-        sex.code as code -> patient.gender = code "set gender";
-    } "set gender rule";
-}
-
-group ExtractComposition(source src: WHOLogicalModel, target composition: Composition) {
-    src.hcid as hcid ->
-        composition.identifier as identif,
-        identif.value = hcid
-        "set identifier ci";
-
-    src -> composition.title = "International Certificate of Vaccination or Prophylaxis" "Title";
-
-    src -> composition.category as category, category.coding as coding then {
-        src -> coding.code = "ddcc-vs" "Category";
-    } "set category";
-
-    src -> composition.type as type, type.coding as coding then {
-      src -> coding.system = "http://loinc.org", coding.code = "82593-5", coding.display = "Immunization summary report" "set type coding";
-    } "set type";
-
-    src -> composition.event as event, event.period = create('Period') as period then ExtractPeriod(src, period) "Extract Period";
-}
-
-group ExtractPeriod(source src: WHOLogicalModel, target tgt : Period) {
-    src.valid_from as iat -> tgt.start = iat "Start issuedAt";
-    src.valid_until as exp -> tgt.end = exp "End expiration";
+group DDCCToComposition(source src : DDCCVS, target comp : DDCCComposition, source id, source pid) {
+  id -> comp.id = id "set id";
+  src ->  comp.subject as patient,  patient.reference = append('Patient/', pid) "set patient";
+  src ->  comp.type as type,  type.coding as coding then {
+    src ->  coding.system = 'http://loinc.org',  coding.code = '82593-5' "set type coding";
+  } "set type";
+  src.certificate as certificate ->  comp.author as author,  comp.event as event then {
+    certificate.period as period -> event.period = period "set event period";
+    certificate.issuer as issuer -> author.type = 'Organization' then {
+      issuer.identifier as pha -> author.identifier as identifier then {
+        pha.value as value -> identifier.value = value "set pha";
+      } "set author identifier";
+    } "set author ref";
+  } "set certificate";
 }
