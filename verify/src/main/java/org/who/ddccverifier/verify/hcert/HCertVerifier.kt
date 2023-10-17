@@ -133,6 +133,7 @@ class HCertVerifier (private val registry: TrustRegistry) {
         }
 
         return null
+    }
     
 
     fun unpackAndVerify(qr: String): QRDecoder.VerificationResult {
