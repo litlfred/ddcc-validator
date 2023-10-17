@@ -11,7 +11,7 @@ import org.who.ddccverifier.QRDecoder
 import org.who.ddccverifier.trust.TrustRegistry
 import org.who.ddccverifier.verify.hcert.dcc.DccMapper
 import org.who.ddccverifier.verify.hcert.dcc.logical.CWT
-//import org.who.ddccverifier.verify.hcert.dcc.logical.WHO_CoreDataSet
+import org.who.ddccverifier.verify.hcert.dcc.logical.WHO_CoreDataSet
 import org.who.ddccverifier.verify.hcert.who.WhoMapper
 import java.security.PublicKey
 import java.util.*
