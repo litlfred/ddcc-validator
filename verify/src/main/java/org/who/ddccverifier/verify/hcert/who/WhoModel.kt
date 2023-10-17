@@ -14,7 +14,7 @@ import org.who.ddccverifier.verify.shc.DecimalToDataTimeDeserializer
 import kotlin.reflect.full.declaredMemberProperties
 
 
-class WHO_CoreDatSet (
+class WHO_CoreDataSet (
     val name: StringType?,
     val birthDate: DateType?,
     val identifier: Identifier?,
