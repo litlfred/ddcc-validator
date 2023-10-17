@@ -8,7 +8,7 @@ import org.who.ddccverifier.verify.hcert.dcc.logical.WHOLogicalModel
  * Translates a DDCC QR CBOR object into FHIR Objects
  */
 class WhoMapper: BaseMapper() {
-    fun run(who: WHOLogicalModel): Bundle {
+    fun run(who: WHO_CoreDataSet): Bundle {
         return super.run(
             who,
             "WHOtoDDCC.map"
