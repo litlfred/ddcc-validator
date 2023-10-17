@@ -133,7 +133,7 @@ class HCertVerifier (private val registry: TrustRegistry) {
         }
 
         return null
-    }
+    
 
     fun unpackAndVerify(qr: String): QRDecoder.VerificationResult {
         val hc1Decoded = prefixDecode(qr)
