@@ -1,7 +1,7 @@
 map "http://worldhealthorganization.github.io/ddcc/StructureMap/CertWHOtoDDCC" = "WHOtoDDCC"
 map "http://worldhealthorganization.github.io/ddcc/StructureMap/CoreDataSetVSToAddBundle" = "WHOtoDDCC"
 
-
+uses "http://worldhealthorganization.github.io/ddcc/StructureDefinition/HCert" alias CWT as source
 uses "http://worldhealthorganization.github.io/ddcc/StructureDefinition/DDCCCoreDataSet.VS" alias DDCCVS as source
 uses "http://hl7.org/fhir/StructureDefinition/Bundle" alias AddBundle as target
 uses "http://hl7.org/fhir/StructureDefinition/Patient" alias Patient as target
@@ -10,8 +10,21 @@ uses "http://worldhealthorganization.github.io/ddcc/StructureDefinition/DDCCDocu
 uses "http://worldhealthorganization.github.io/ddcc/StructureDefinition/DDCCVSComposition" alias DDCCVSComposition as produced
 uses "http://worldhealthorganization.github.io/ddcc/StructureDefinition/DDCCImmunization" alias DDCCImmunization as produced
 uses "http://worldhealthorganization.github.io/ddcc/StructureDefinition/DDCCImmunizationRecommendation" alias DDCCImmRec as produced
+uses "http://worldhealthorganization.github.io/ddcc/StructureDefinition/HCert" alias HCert as source
+uses "http://worldhealthorganization.github.io/ddcc/StructureDefinition/CWT_Payload" alias CWTPayload as source
+group HCert
 
 
+group EUDCCtoDDCC (source src: HCert, target bundle: Bundle){
+    src -> bundle.type = "transaction" "set bundle type";
+
+    src -> bundle, bundle.entry as entry, entry.resource = create('Composition') as comp then {
+      src.data as data then {
+            data.ddccvr as ddccvr -> bundle then CoreDataSetVSToAddBundle(ddccvr, bundle, comp) "Certificate";
+        } "Processing cert data";
+        src -> bundle then ExtractComposition(src, comp) "Composition";
+    } "Patient and Composition Create";
+}
 
 group CoreDataSetVSToAddBundle(source ddcc : WHOLogicalModel, target bundle : AddBundle) {
   ddcc -> bundle then VSToAddBundle(ddcc, bundle) "setup add bundle";
