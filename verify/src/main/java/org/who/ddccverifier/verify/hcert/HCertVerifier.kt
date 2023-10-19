@@ -116,8 +116,8 @@ class HCertVerifier (private val registry: TrustRegistry) {
                     e.printStackTrace()
                 }
 
-        if (hcertPayLoad[HCERT_Code][DDCC_VS_CODE] != null
-            || hcertPayLoad[HCERT_Code][DDCC_TR_CODE] ) 
+        if (hcertClaim[DDCC_VS_CODE] != null
+            || hcertClaim[DDCC_TR_CODE] ) 
             try {
                 return WHOMapper().run(
                     jacksonObjectMapper().readValue(
