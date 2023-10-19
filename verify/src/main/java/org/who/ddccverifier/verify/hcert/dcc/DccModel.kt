@@ -35,10 +35,10 @@ class CWT (
 
 class HCERT(
     @JsonProperty("1")
-    val cert: HC1?          // Cert
+    val eudcc: EUDCC?          // Cert
 ): BaseModel()
 
-class HC1(
+class EUDCC(
     val ver: StringType?,       // Schema version
     val nam: PersonName?,       // Person name
     val dob: DateType?,         // date of birth
