@@ -14,7 +14,7 @@ import org.who.ddccverifier.verify.shc.DecimalToDataTimeDeserializer
 import kotlin.reflect.full.declaredMemberProperties
 
 
-class WHO_CoreDataSet (
+open class WHO_CoreDataSet (
     val name: StringType?,
     val birthDate: DateType?,
     val identifier: Identifier?,
@@ -22,12 +22,20 @@ class WHO_CoreDataSet (
 ): BaseModel()
 
 class WHO_CoreDataSet_VS (
-    val vaccination: WHO_Vaccination?
-): WHO_CoreDataSet()
+    val vaccination: WHO_Vaccination?,
+    name: StringType?,
+    birthDate: DateType?,
+    identifier: Identifier?,
+    certifcate: WHO_Certificate?
+): WHO_CoreDataSet(name, birthDate, identifier, certifcate)
 
 class WHO_CoreDataSet_TR (
-    val test: WHO_Test?
-): WHO_CoreDataSet()
+    val test: WHO_Test?,
+    name: StringType?,
+    birthDate: DateType?,
+    identifier: Identifier?,
+    certifcate: WHO_Certificate?
+): WHO_CoreDataSet(name, birthDate, identifier, certifcate)
 
 
 class WHO_Certificate(
