@@ -15,7 +15,8 @@ group EUDCCtoDDCC (source src: HCertDCC, target bundle: Bundle){
     src -> bundle.type = "transaction" "set bundle type";
 
     src -> bundle, bundle.entry as entry, entry.resource = create('Composition') as comp then {
-            ExtractCert(src, bundle, comp) "Certificate";
+      src.data as data then {
+            data.eudcc as eudcc -> bundle then ExtractCert(eudcc, bundle, comp) "Certificate";
         } "Processing cert data";
         src -> bundle then ExtractComposition(src, comp) "Composition";
     } "Patient and Composition Create";
