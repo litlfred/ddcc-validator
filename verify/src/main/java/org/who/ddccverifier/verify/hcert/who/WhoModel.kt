@@ -26,16 +26,16 @@ class WHO_CoreDataSet_VS (
     name: StringType?,
     birthDate: DateType?,
     identifier: Identifier?,
-    certifcate: WHO_Certificate?
-): WHO_CoreDataSet(name, birthDate, identifier, certifcate)
+    certificate: WHO_Certificate?
+): WHO_CoreDataSet(name, birthDate, identifier, certificate)
 
 class WHO_CoreDataSet_TR (
     val test: WHO_Test?,
     name: StringType?,
     birthDate: DateType?,
     identifier: Identifier?,
-    certifcate: WHO_Certificate?
-): WHO_CoreDataSet(name, birthDate, identifier, certifcate)
+    certificate: WHO_Certificate?
+): WHO_CoreDataSet(name, birthDate, identifier, certificate)
 
 
 class WHO_Certificate(
