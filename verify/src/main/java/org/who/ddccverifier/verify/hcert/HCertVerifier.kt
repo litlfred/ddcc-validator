@@ -104,7 +104,7 @@ class HCertVerifier (private val registry: TrustRegistry) {
         if (hcertClaim == null) 
             return null
         
-        if (hcertClaim[DCC_CODE] != null) { 
+        if (hcertClaim[DCC_CODE] != null) 
             try {
                  return DccMapper().run(
                     jacksonObjectMapper().readValue(
