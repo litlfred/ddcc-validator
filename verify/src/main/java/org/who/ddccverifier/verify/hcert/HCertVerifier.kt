@@ -111,7 +111,7 @@ class HCertVerifier (private val registry: TrustRegistry) {
                     hcertPayload.ToJSONString(),
                             CWT::class.java
                         )
-                    ).data
+                    )
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
@@ -124,7 +124,7 @@ class HCertVerifier (private val registry: TrustRegistry) {
                         hcertPayload.ToJSONString(),
                         WHO_CoreDataSet::class.java
                     )
-                ).data
+                )
             } catch (e: Exception) {
                  e.printStackTrace()
             }
