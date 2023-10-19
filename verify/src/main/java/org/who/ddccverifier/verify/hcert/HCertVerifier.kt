@@ -119,7 +119,7 @@ class HCertVerifier (private val registry: TrustRegistry) {
         if (hcertClaim[DDCC_VS_CODE] != null
             || hcertClaim[DDCC_TR_CODE] ) 
             try {
-                return WHOMapper().run(
+                return WhoMapper().run(
                     jacksonObjectMapper().readValue(
                         hcertPayload.ToJSONString(),
                         CWT::class.java
