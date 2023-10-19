@@ -1,6 +1,7 @@
 map "http://worldhealthorganization.github.io/ddcc/StructureMap/CertDCCtoDDCC" = "EUDCCtoDDCC"
 
-uses "http://worldhealthorganization.github.io/ddcc/StructureDefinition/CertDCC"        alias CWT as source
+uses "http://worldhealthorganization.github.io/ddcc/StructureDefinition/HCertDCC"        alias HCertDCC as source
+uses "http://worldhealthorganization.github.io/ddcc/StructureDefinition/CWT_Payload" alias CWTPayload as source
 uses "http://hl7.eu/fhir/ig/dcc/StructureDefinition/HC1"        alias HC1 as source
 uses "http://hl7.eu/fhir/ig/dcc/StructureDefinition/PersonName" alias PersonName as source
 uses "http://hl7.eu/fhir/ig/dcc/StructureDefinition/v"          alias VacEvent as source
@@ -10,12 +11,11 @@ uses "http://hl7.eu/fhir/ig/dcc/StructureDefinition/r"          alias RecEvent a
 uses "http://hl7.org/fhir/StructureDefinition/Bundle"                                     alias Bundle as target
 
 
-group EUDCCtoDDCC (source src: CWT, target bundle: Bundle){
+group EUDCCtoDDCC (source src: HCertDCC, target bundle: Bundle){
     src -> bundle.type = "transaction" "set bundle type";
 
     src -> bundle, bundle.entry as entry, entry.resource = create('Composition') as comp then {
-        src.data as data then {
-            data.educc as eudcc -> bundle then ExtractCert(eudcc, bundle, comp) "Certificate";
+            ExtractCert(src, bundle, comp) "Certificate";
         } "Processing cert data";
         src -> bundle then ExtractComposition(src, comp) "Composition";
     } "Patient and Composition Create";
