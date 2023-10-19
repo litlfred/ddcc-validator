@@ -18,10 +18,16 @@ class WHO_CoreDataSet (
     val name: StringType?,
     val birthDate: DateType?,
     val identifier: Identifier?,
-    val certiifcate: WHO_Certificate?,
-    val vaccination: WHO_Vaccination?,
-    val test: WHO_Test?
+    val certifcate: WHO_Certificate?,
 ): BaseModel()
+
+class WHO_CoreDataSet_VS (
+    val vaccination: WHO_Vaccination?
+): WHO_CoreDataSet()
+
+class WHO_CoreDataSet_TR (
+    val test: WHO_Test?
+): WHO_CoreDataSet()
 
 
 class WHO_Certificate(
