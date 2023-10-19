@@ -94,45 +94,43 @@ class HCertVerifier (private val registry: TrustRegistry) {
         return getContent(signedMessage)
     }
 
-    val EU_DCC_CODE = -260
+    val HCERT_CODE = -260
+    val DCC_CODE = 1
+    val DDCC_VS_CODE = 2
+    val DDCC_TR_CODE = 3
 
     fun toFhir(hcertPayload: CBORObject): Bundle? {
-        if (hcertPayload[EU_DCC_CODE] != null)
+        val hcertClaim = hcertPayload[HCERT_CODE]
+        if (hcertClaim == null) 
+            return null
+        
+        if (hcertClaim[DCC_CODE] != null) { 
             try {
-                return DccMapper().run(
+                 return DccMapper().run(
+                    jacksonObjectMapper().readValue(
+                    hcertPayload.ToJSONString(),
+                            CWT::class.java
+                        )
+                    )
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+
+        if (hcertPayLoad[HCERT_Code][DDCC_VS_CODE] != null
+            || hcertPayLoad[HCERT_Code][DDCC_TR_CODE] ) 
+            try {
+                return WHOMapper().run(
                     jacksonObjectMapper().readValue(
                         hcertPayload.ToJSONString(),
-                        CWT::class.java
+                        WHO_CoreDataSet::class.java
                     )
                 )
             } catch (e: Exception) {
-                e.printStackTrace()
+                 e.printStackTrace()
             }
-        
-
-//        try {
-//            return WhoMapper().run(
-//                jacksonObjectMapper().readValue(
-//                    hcertPayload.ToJSONString(),
-//                    WHOLogicalModel::class.java
-//                )
-//            );
-//        } catch (e: Exception) {
-//            e.printStackTrace()
-//        }
-
-        try {
-            jacksonObjectMapper().readValue(
-                hcertPayload.ToJSONString(),
-                WHO_CoreDataSet::class.java
-            ).let {
-                return WhoMapper().run(it);
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
 
         return null
+                
     }
     
 
