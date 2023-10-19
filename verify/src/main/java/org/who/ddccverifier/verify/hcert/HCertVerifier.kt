@@ -122,7 +122,7 @@ class HCertVerifier (private val registry: TrustRegistry) {
                 return WHOMapper().run(
                     jacksonObjectMapper().readValue(
                         hcertPayload.ToJSONString(),
-                        WHO_CoreDataSet::class.java
+                        CWT::class.java
                     )
                 )
             } catch (e: Exception) {
