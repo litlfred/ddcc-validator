@@ -36,6 +36,11 @@ class CWT (
 class HCERT(
     @JsonProperty("1")
     val eudcc: EUDCC?          // Cert
+    @JsonProperty("2")
+    val ddccvs: DDCCVS?          // Cert
+    @JsonProperty("3")
+    val ddcctr: DDCCTR?          // Cert
+
 ): BaseModel()
 
 class EUDCC(
