@@ -108,7 +108,7 @@ class HCertVerifier (private val registry: TrustRegistry) {
             println("No HCERT Code")
             return null
         }
-        val a = hcertClaim[DCC_CODE]
+
         if (hcertClaim[DCC_CODE] != null) 
             try {
                  println("Found DCC Code")
@@ -119,6 +119,7 @@ class HCertVerifier (private val registry: TrustRegistry) {
                         )
                     )
                 } catch (e: Exception) {
+                    println("Exception in mapping DCC")
                     e.printStackTrace()
                 }
 
@@ -133,6 +134,7 @@ class HCertVerifier (private val registry: TrustRegistry) {
                     )
                 )
             } catch (e: Exception) {
+                println("Exception in processing DDCC")
                  e.printStackTrace()
             }
 
