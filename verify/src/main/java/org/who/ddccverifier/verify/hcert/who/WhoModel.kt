@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import org.hl7.fhir.instance.model.api.IIdType
 import org.hl7.fhir.r4.model.*
 import org.who.ddccverifier.verify.BaseModel
 import org.who.ddccverifier.verify.shc.DecimalToDataTimeDeserializer
@@ -39,7 +40,7 @@ class WHO_CoreDataSet_TR (
 
 
 class WHO_Certificate(
-    val issuer: Reference, //is there a way to specify it is Organization reference?
+    val issuer: StringType, //is there a way to specify it is Organization Reference?
     val kid: StringType?,
     val hcid: Identifier?,
     val ddccid: Identifier?,
