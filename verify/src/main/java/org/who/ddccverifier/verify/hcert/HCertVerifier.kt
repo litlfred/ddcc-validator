@@ -101,11 +101,14 @@ class HCertVerifier (private val registry: TrustRegistry) {
 
     fun toFhir(hcertPayload: CBORObject): Bundle? {
         val hcertClaim = hcertPayload[HCERT_CODE]
-        if (hcertClaim == null) 
+        if (hcertClaim == null) {
+            println("No HCERT Code")
             return null
+        }
         
         if (hcertClaim[DCC_CODE] != null) 
             try {
+                 println("Found DCC Code")
                  return DccMapper().run(
                     jacksonObjectMapper().readValue(
                     hcertPayload.ToJSONString(),
@@ -119,6 +122,7 @@ class HCertVerifier (private val registry: TrustRegistry) {
         if (hcertClaim[DDCC_VS_CODE] != null
             || hcertClaim[DDCC_TR_CODE] != null )
             try {
+                println("Found VS or TR code")
                 return WhoMapper().run(
                     jacksonObjectMapper().readValue(
                         hcertPayload.ToJSONString(),
@@ -129,6 +133,7 @@ class HCertVerifier (private val registry: TrustRegistry) {
                  e.printStackTrace()
             }
 
+        println("no valid claim under hcert")
         return null
                 
     }
