@@ -56,10 +56,13 @@ class HCertVerifier (private val registry: TrustRegistry) {
         }
     }
 
+    val ISS_CODE = 1
     private fun getKID(input: Sign1Message): String? {
-        val kid = input.protectedAttributes[COSE.HeaderKeys.KID.AsCBOR()]?.GetByteString()
-               ?: input.unprotectedAttributes[COSE.HeaderKeys.KID.AsCBOR()]?.GetByteString()
-               ?: return null
+        var kid = input.protectedAttributes[COSE.HeaderKeys.KID.AsCBOR()]?.GetByteString()
+            ?: input.unprotectedAttributes[COSE.HeaderKeys.KID.AsCBOR()]?.GetByteString()
+            ?: return null
+        if (input.unprotectedAttributes[ISS_CODE] != null)
+            kid = input.unprotectedAttributes[ISS_CODE].GetByteString() + kid
         return Base64.getEncoder().encodeToString(kid)
     }
 
@@ -105,7 +108,7 @@ class HCertVerifier (private val registry: TrustRegistry) {
             println("No HCERT Code")
             return null
         }
-        
+        val a = hcertClaim[DCC_CODE]
         if (hcertClaim[DCC_CODE] != null) 
             try {
                  println("Found DCC Code")
