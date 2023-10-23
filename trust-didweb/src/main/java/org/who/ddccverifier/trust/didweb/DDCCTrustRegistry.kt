@@ -29,8 +29,8 @@ class DDCCTrustRegistry : TrustRegistry {
         const val registrySigningKey = "did:web:PCF.PW:1A13#WEB"
         const val baseDID = "did:web:raw.githubusercontent.com:WorldHealthOrganization:ddcc-trust:main:dist"
 
-        const val PROD_KEY_ID = "$baseDID:prod:u:k"
-        const val TEST_KEY_ID = "$baseDID:test:u:k"
+        const val PROD_KEY_ID = "did:web:tng-cdn-dev:who:int:trustlist"  
+        const val TEST_KEY_ID = "did:web:tng-uat:who:int:trustlist"
 
         const val PROD_DID = "https://tng-cdn-uat.who.int/trustlist/did.json"  //this is UAT not PROD!!! 
         const val TEST_DID = "https://tng-cdn-dev.who.int/trustlist/did.json"
