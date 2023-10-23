@@ -134,6 +134,9 @@ class HCertVerifier (private val registry: TrustRegistry) {
             }
 
         println("no valid claim under hcert")
+        println(hcertPayload.ToJSONString())
+        println(hcertClaim.ToJSONString())
+
         return null
                 
     }
