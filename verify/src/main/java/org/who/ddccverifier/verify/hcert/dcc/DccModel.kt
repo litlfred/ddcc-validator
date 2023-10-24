@@ -35,11 +35,11 @@ class CWT (
 
 class HCERT(
     @JsonProperty("1")
-    val eudcc: EUDCC?,          // Cert
+    val `1`: EUDCC?,          // Cert
     @JsonProperty("2")
-    val ddccvs: WHO_CoreDataSet_VS?,          // Cert
+    val `2`: WHO_CoreDataSet_VS?,          // Cert
     @JsonProperty("3")
-    val ddcctr: WHO_CoreDataSet_TR?          // Cert
+    val `3`: WHO_CoreDataSet_TR?          // Cert
 
 ): BaseModel()
 

@@ -20,7 +20,7 @@ group EUDCCtoDDCC (source src: HCert, target bundle: Bundle){
 
     src -> bundle, bundle.entry as entry, entry.resource = create('Composition') as comp then {
       src.data as data then {
-            data.ddccvr as ddccvr -> bundle then CoreDataSetVSToAddBundle(ddccvr, bundle, comp) "Certificate";
+            data.`2` as ddccvr -> bundle then CoreDataSetVSToAddBundle(ddccvr, bundle, comp) "Certificate";
         } "Processing cert data";
         src -> bundle then ExtractComposition(src, comp) "Composition";
     } "Patient and Composition Create";
