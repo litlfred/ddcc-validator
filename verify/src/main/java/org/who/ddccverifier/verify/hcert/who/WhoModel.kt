@@ -23,7 +23,7 @@ open class WHO_CoreDataSet (
 ): BaseModel()
 
 class WHO_CoreDataSet_VS (
-    val vaccination: WHO_Vaccination?, name: StringType?, birthDate: DateType?,
+    val vaccination: WHO_Vaccination?,  name: StringType?,birthDate: DateType?,
 //    val identifier: Identifier?,
 //    val certificate: WHO_Certificate?
 //): WHO_CoreDataSet(name, birthDate, identifier, certificate)
@@ -51,21 +51,21 @@ class WHO_CertificatePeriod(
 ): BaseModel()
 
 class WHO_Vaccination(
-    val vaccine: Coding?,
-    val brand: Coding?,
-    val manufacturer: Coding?,
-    val maholder: Coding?,
-    val lot: StringType?,
-    val date: DateTimeType?,
-    val validFrom: DateType?,
-    val dose: PositiveIntType?,
-    val totalDoses: PositiveIntType?,
-    val country: Coding?,
-    val centre: StringType?,
-    val signature: Signature?,
-    val practitioner: Identifier?,
-    val disease: Coding?,
-    val nextDose: DateTimeType?
+//    val vaccine: Coding?,
+//    val brand: Coding?,
+//    val manufacturer: Coding?,
+//    val maholder: Coding?,
+//    val lot: StringType?,
+//    val date: DateTimeType?,
+//    val validFrom: DateType?,
+//    val dose: PositiveIntType?,
+//    val totalDoses: PositiveIntType?,
+//    val country: Coding?,
+//    val centre: StringType?,
+//    val signature: Signature?,
+//    val practitioner: Identifier?,
+//    val disease: Coding?,
+//    val nextDose: DateTimeType?
 ): BaseModel() 
 
 class WHO_Test(
