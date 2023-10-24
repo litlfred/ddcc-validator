@@ -45,7 +45,7 @@ class WHO_Certificate(
     val hcid: Identifier?,
     val ddccid: Identifier?,
     val version: StringType,
-    val period: WHO_CertificatePeriod
+    val period: WHO_CertificatePeriod?
 ): BaseModel()
 
 class WHO_CertificatePeriod(
@@ -68,7 +68,7 @@ class WHO_Vaccination(
     val signature: Signature?,
     val practitioner: Identifier?,
     val disease: Coding?,
-    val nextDose: DateTimeType 
+    val nextDose: DateTimeType?
 ): BaseModel() 
 
 class WHO_Test(
