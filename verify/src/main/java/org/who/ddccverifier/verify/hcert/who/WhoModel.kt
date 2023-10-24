@@ -56,16 +56,16 @@ class WHO_Vaccination(
     val manufacturer: Coding?,
     val maholder: Coding?,
     val lot: StringType?,
-    val date: DateTimeType?,
-    val validFrom: DateType?,
-    val dose: PositiveIntType?,
-    val totalDoses: PositiveIntType?,
-    val country: Coding?,
-    val centre: StringType?,
-    val signature: Signature?,
+//    val date: DateTimeType?,
+//    val validFrom: DateType?,
+//    val dose: PositiveIntType?,
+//    val totalDoses: PositiveIntType?,
+//    val country: Coding?,
+//   val centre: StringType?,
+//    val signature: Signature?,
 //    val practitioner: Identifier?,
-    val disease: Coding?,
-    val nextDose: DateTimeType?
+//    val disease: Coding?,
+//    val nextDose: DateTimeType?
 ): BaseModel() 
 
 class WHO_Test(
