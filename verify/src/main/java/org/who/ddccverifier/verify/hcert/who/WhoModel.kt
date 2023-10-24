@@ -18,25 +18,23 @@ import kotlin.reflect.full.declaredMemberProperties
 open class WHO_CoreDataSet (
     val name: StringType?,
     val birthDate: DateType?,
-    val identifier: Identifier?,
-    val certifcate: WHO_Certificate?,
+//    val identifier: Identifier?,
+//    val certifcate: WHO_Certificate?,
 ): BaseModel()
 
 class WHO_CoreDataSet_VS (
-    val vaccination: WHO_Vaccination?,
-    name: StringType?,
-    birthDate: DateType?,
-//    identifier: Identifier?,
-//    certificate: WHO_Certificate?
+    val vaccination: WHO_Vaccination?, name: StringType?, birthDate: DateType?,
+//    val identifier: Identifier?,
+//    val certificate: WHO_Certificate?
 //): WHO_CoreDataSet(name, birthDate, identifier, certificate)
 ): WHO_CoreDataSet(name, birthDate)
 
 class WHO_CoreDataSet_TR (
     val test: WHO_Test?,
     name: StringType?,
-    birthDate: DateType?,
-//    identifier: Identifier?,
-//    certificate: WHO_Certificate?
+    birthDate: DateType?
+//    val identifier: Identifier?,
+//    val certificate: WHO_Certificate?
 //): WHO_CoreDataSet(name, birthDate, identifier, certificate)
 ): WHO_CoreDataSet(name, birthDate)
 
