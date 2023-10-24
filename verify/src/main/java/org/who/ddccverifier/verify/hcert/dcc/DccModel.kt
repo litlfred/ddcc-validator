@@ -1,4 +1,4 @@
-package org.who.ddccverifier.verify.hcert.dcc.logical
+package org.who.ddccverifier.verify.hcert.dcc
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum
 import com.fasterxml.jackson.annotation.JsonProperty
@@ -10,6 +10,8 @@ import org.hl7.fhir.r4.model.*
 import org.who.ddccverifier.verify.BaseModel
 import org.who.ddccverifier.verify.shc.DecimalToDataTimeDeserializer
 import java.util.*
+import org.who.ddccverifier.verify.hcert.who.WHO_CoreDataSet_VS
+import org.who.ddccverifier.verify.hcert.who.WHO_CoreDataSet_TR
 
 class CWT (
     @JsonProperty("1")

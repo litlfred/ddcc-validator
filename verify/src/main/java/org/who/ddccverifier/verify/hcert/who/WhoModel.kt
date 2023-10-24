@@ -1,5 +1,6 @@
-package org.who.ddccverifier.verify.hcert.dcc.logical
+package org.who.ddccverifier.verify.hcert.who
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.core.TreeNode
@@ -18,34 +19,36 @@ import kotlin.reflect.full.declaredMemberProperties
 open class WHO_CoreDataSet (
     val name: StringType?,
     val birthDate: DateType?,
-    val identifier: Identifier?,
-    val certifcate: WHO_Certificate?,
+    val identifier: StringType?,
 ): BaseModel()
-
+@JsonIgnoreProperties(ignoreUnknown = true)
 class WHO_CoreDataSet_VS (
+    val name: StringType?,
+    val birthDate: DateType?,
+    val sex: CodeType?,
+    val identifier: StringType?,
+    // certificate
+    val certificate: WHO_Certificate?,
+    // vaccination
     val vaccination: WHO_Vaccination?,
-    name: StringType?,
-    birthDate: DateType?,
-    identifier: Identifier?,
-    certificate: WHO_Certificate?
-): WHO_CoreDataSet(name, birthDate, identifier, certificate)
+): BaseModel()
 
 class WHO_CoreDataSet_TR (
     val test: WHO_Test?,
-    name: StringType?,
-    birthDate: DateType?,
-    identifier: Identifier?,
-    certificate: WHO_Certificate?
-): WHO_CoreDataSet(name, birthDate, identifier, certificate)
+    val name: StringType?,
+    val birthDate: DateType?,
+    val identifier: StringType?,
+    val certificate: WHO_Certificate?
+): BaseModel()
 
 
 class WHO_Certificate(
-    val issuer: StringType, //is there a way to specify it is Organization Reference?
+    val hcid: StringType?,
+    val issuer: IdentifierData?, //is there a way to specify it is Organization Reference?
+    val period: WHO_CertificatePeriod?,
     val kid: StringType?,
-    val hcid: Identifier?,
-    val ddccid: Identifier?,
+    val ddccid: IdentifierData?,
     val version: StringType,
-    val period: WHO_CertificatePeriod
 ): BaseModel()
 
 class WHO_CertificatePeriod(
@@ -53,10 +56,14 @@ class WHO_CertificatePeriod(
     val end: DateTimeType?,
 ): BaseModel()
 
+class IdentifierData (
+    val identifier: StringType?,
+): BaseModel()
 class WHO_Vaccination(
     val vaccine: Coding?,
     val brand: Coding?,
-    val manufacturer: Coding?,
+    @JsonDeserialize(using = CodingOrReferenceDeserializer::class)
+    val manufacturer: Base?,
     val maholder: Coding?,
     val lot: StringType?,
     val date: DateTimeType?,
@@ -65,10 +72,11 @@ class WHO_Vaccination(
     val totalDoses: PositiveIntType?,
     val country: Coding?,
     val centre: StringType?,
-    val signature: Signature?,
-    val practitioner: Identifier?,
+    //val signature: Signature?,
+    val practitioner: StringType?,
     val disease: Coding?,
-    val nextDose: DateTimeType 
+    val nextDose: DateTimeType,
+
 ): BaseModel() 
 
 class WHO_Test(
@@ -82,3 +90,17 @@ class WHO_Test(
     val centre: Coding?,
     val country: Coding?
 ): BaseModel()
+
+object CodingOrReferenceDeserializer: JsonDeserializer<Base>() {
+    override fun deserialize(p: JsonParser, ctxt: DeserializationContext): Base? {
+        val token: TreeNode = p.readValueAsTree()
+
+        return if (token.isValueNode) {
+            Reference().apply {
+                id = token.toString()
+            }
+        } else {
+            return jacksonObjectMapper().readValue<Coding>(token.toString())
+        }
+    }
+}

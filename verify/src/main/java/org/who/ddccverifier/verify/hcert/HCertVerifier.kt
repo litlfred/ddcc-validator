@@ -3,15 +3,16 @@ package org.who.ddccverifier.verify.hcert
 import COSE.MessageTag
 import COSE.OneKey
 import COSE.Sign1Message
+import com.fasterxml.jackson.databind.DatabindException
+import com.fasterxml.jackson.databind.exc.InvalidDefinitionException
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.upokecenter.cbor.CBORObject
 import nl.minvws.encoding.Base45
 import org.hl7.fhir.r4.model.Bundle
 import org.who.ddccverifier.QRDecoder
 import org.who.ddccverifier.trust.TrustRegistry
+import org.who.ddccverifier.verify.hcert.dcc.CWT
 import org.who.ddccverifier.verify.hcert.dcc.DccMapper
-import org.who.ddccverifier.verify.hcert.dcc.logical.CWT
-import org.who.ddccverifier.verify.hcert.dcc.logical.WHO_CoreDataSet
 import org.who.ddccverifier.verify.hcert.who.WhoMapper
 import java.security.PublicKey
 import java.util.*
@@ -123,25 +124,43 @@ class HCertVerifier (private val registry: TrustRegistry) {
                     e.printStackTrace()
                 }
 
-        if (hcertClaim[DDCC_VS_CODE] != null
-            || hcertClaim[DDCC_TR_CODE] != null )
+        if (hcertClaim[DDCC_VS_CODE] != null)
             try {
-                println("Found VS or TR code")
-                return WhoMapper().run(
-                    jacksonObjectMapper().readValue(
-                        hcertPayload.ToJSONString(),
-                        CWT::class.java
-                    )
-                )
-            } catch (e: Exception) {
+                println("Found VS")
+                return jacksonObjectMapper().readValue(
+                    hcertPayload.ToJSONString(),
+                    CWT::class.java
+                ).data?.ddccvs?.let {
+                    WhoMapper().run(it)
+                }
+
+            }
+            catch (e: InvalidDefinitionException) {
+                println("Exception in processing DDCC" + e.localizedMessage)
+                e.printStackTrace()
+            }
+            catch (e: Exception) {
                 println("Exception in processing DDCC")
                  e.printStackTrace()
+            }
+
+        if (hcertClaim[DDCC_TR_CODE] != null )
+            try {
+                println("Found TR code")
+                return jacksonObjectMapper().readValue(
+                        hcertPayload.ToJSONString(),
+                        CWT::class.java
+                    ).data?.ddcctr?.let {
+                        WhoMapper().run(it)
+                    }
+            } catch (e: Exception) {
+                println("Exception in processing DDCC")
+                e.printStackTrace()
             }
 
         println("no valid claim under hcert")
         println(hcertPayload.ToJSONString())
         println(hcertClaim.ToJSONString())
-        println(hcertClaim[DCC_CODE].ToJSONString())
         return null
                 
     }
