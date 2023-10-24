@@ -35,7 +35,7 @@ class WHO_CoreDataSet_TR (
 ): WHO_CoreDataSet(name, birthDate, certificate)
 
 class WHO_Certificate(
-    val issuer: Reference, //is there a way to specify it is Organization Reference?
+//    val issuer: Reference, //is there a way to specify it is Organization Reference?
     val kid: StringType?,
 //    val hcid: Identifier?,
 //    val ddccid: Identifier?,
