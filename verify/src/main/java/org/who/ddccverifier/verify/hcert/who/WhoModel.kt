@@ -18,18 +18,18 @@ import kotlin.reflect.full.declaredMemberProperties
 open class WHO_CoreDataSet (
     val name: StringType?,
     val birthDate: DateType?,
-    val identifier: Identifier?,
+    val identifier: StringType?,
 //    val certificate: WHO_Certificate?,
 ): BaseModel()
 
 class WHO_CoreDataSet_VS (
-    val vaccination: WHO_Vaccination?,  name: StringType?,birthDate: DateType?, identifier: Identifier?
+    val vaccination: WHO_Vaccination?,  name: StringType?,birthDate: DateType?, identifier: StringType?
     //certificate: WHO_Certificate?
 //): WHO_CoreDataSet(name, birthDate, identifier, certificate)
 ): WHO_CoreDataSet(name, birthDate, identifier)
 
 class WHO_CoreDataSet_TR (
-    val test: WHO_Test?, name: StringType?, birthDate: DateType?, identifier: Identifier?
+    val test: WHO_Test?, name: StringType?, birthDate: DateType?, identifier: StringType?
     //certificate: WHO_Certificate?
 //): WHO_CoreDataSet(name, birthDate, identifier, certificate)
 ): WHO_CoreDataSet(name, birthDate, identifier )
@@ -37,8 +37,8 @@ class WHO_CoreDataSet_TR (
 class WHO_Certificate(
 //    val issuer: Reference, //is there a way to specify it is Organization Reference?
     val kid: StringType?,
-    val hcid: Identifier?,
-    val ddccid: Identifier?,
+    val hcid: StringType?,
+    val ddccid: StringType?,
     val version: StringType,
     val period: WHO_CertificatePeriod?
 ): BaseModel()
@@ -61,7 +61,7 @@ class WHO_Vaccination(
     val country: Coding?,
     val centre: StringType?,
 //    val signature: Signature?,
-    val practitioner: Identifier?,
+    val practitioner: StringType?,
     val disease: Coding?,
     val nextDose: DateTimeType?
 ): BaseModel() 
