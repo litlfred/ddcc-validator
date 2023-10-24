@@ -30,9 +30,7 @@ class WHO_CoreDataSet_VS (
 ): WHO_CoreDataSet(name, birthDate)
 
 class WHO_CoreDataSet_TR (
-    val test: WHO_Test?,
-    name: StringType?,
-    birthDate: DateType?
+    val test: WHO_Test?, name: StringType?, birthDate: DateType?,
 //    val identifier: Identifier?,
 //    val certificate: WHO_Certificate?
 //): WHO_CoreDataSet(name, birthDate, identifier, certificate)
