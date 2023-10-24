@@ -19,23 +19,19 @@ open class WHO_CoreDataSet (
     val name: StringType?,
     val birthDate: DateType?,
     val identifier: StringType?,
-//    val certificate: WHO_Certificate?,
+   val certificate: WHO_Certificate?,
 ): BaseModel()
 
 class WHO_CoreDataSet_VS (
-    val vaccination: WHO_Vaccination?,  name: StringType?,birthDate: DateType?, identifier: StringType?
-    //certificate: WHO_Certificate?
-//): WHO_CoreDataSet(name, birthDate, identifier, certificate)
-): WHO_CoreDataSet(name, birthDate, identifier)
+    val vaccination: WHO_Vaccination?,  name: StringType?,birthDate: DateType?, identifier: StringType?, certificate: WHO_Certificate?
+): WHO_CoreDataSet(name, birthDate, identifier, certificate)
 
 class WHO_CoreDataSet_TR (
-    val test: WHO_Test?, name: StringType?, birthDate: DateType?, identifier: StringType?
-    //certificate: WHO_Certificate?
-//): WHO_CoreDataSet(name, birthDate, identifier, certificate)
-): WHO_CoreDataSet(name, birthDate, identifier )
+    val test: WHO_Test?, name: StringType?, birthDate: DateType?, identifier: StringType?, certificate: WHO_Certificate?
+): WHO_CoreDataSet(name, birthDate, identifier, certificate )
 
 class WHO_Certificate(
-//    val issuer: Reference, //is there a way to specify it is Organization Reference?
+    val issuer: String, //is there a way to specify it is Organization Reference?
     val kid: StringType?,
     val hcid: StringType?,
     val ddccid: StringType?,
