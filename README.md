@@ -163,4 +163,65 @@ Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
-limitations under the License.
+limitations under the License.# ddcc-validator
+
+> **New! See [docs/data-models.md](./docs/data-models.md) and [docs/user-workflows.md](./docs/user-workflows.md) for architecture, data models, and developer workflows.**
+
+---
+
+## Overview
+
+This project verifies and transforms digital health certificates from multiple standards (EU DCC, WHO DDCC, SHC, DIVOC, ICAO) into FHIR and other interoperable formats.
+
+### Documentation
+
+- [Digital Health Certificate Data Models](./docs/data-models.md):  
+  Detailed overview of all certificate models used in the system, with source code links.
+- [User Workflows and Developer Orientation](./docs/user-workflows.md):  
+  Main user workflows, step-by-step usage, and guidance for adding new models or versions.
+
+---
+
+## Current Features
+
+1. Decodes QR Codes
+2. Cryptographically Verifies the information following the specifications of
+   1. W3C VC
+   2. Smart Health Cards 
+   3. EU DCC, WHO DCC and LAC PASS DCC 
+   4. ICAO Visible Digital Seals
+3. Verifies the issuer's trust using a [DID-Based](https://www.w3.org/TR/did-core/) Trust List from the [DDCC repo](https://github.com/WorldHealthOrganization/ddcc-trust)
+4. Transform the QR Payload using the DDCC [FHIR Structure Maps](https://worldhealthorganization.github.io/ddcc/)
+5. Calculates the assessment of the health information using CQL Libraries from subscribed IGs
+6. Displays the medical information, the credential information, the issuer information and the assessment results in the screen.
+
+---
+
+## Architecture and Diagrams
+
+See the [Digital Health Certificate Data Models](./docs/data-models.md) and [User Workflows and Developer Orientation](./docs/user-workflows.md) for detailed architecture, workflow, and extension guidance.
+
+---
+
+## Class Diagram
+
+```
+ ║ │  HCertVerifier │  │ ShcVerifier │   │ DivocVerifier │   │ IcaoVerifier  │ ║  │  ║
+ ║ └────┬───────────┘  └──────┬──────┘   └───────┬───────┘   └───────┬───────┘ ║  │  ║
+ ╚══════╪═════════════════════╪══════════════════╪═══════════════════╪═════════╝  │  ║
+        │HCERT CBOR           │JWT JSON          │JSONLD W3C VC      │iJSON       │  ║
+   ┌────▼───────────┐  ┌──────▼──────┐    ┌──────▼──────┐     ┌──────▼──────┐     │  ║
+```
+
+---
+
+## Further Reading
+
+- [FHIR Structure Maps](https://worldhealthorganization.github.io/ddcc/)
+- [Trust Verification](https://github.com/WorldHealthOrganization/ddcc-trust)
+
+---
+
+## License
+
+[MIT](./LICENSE)
